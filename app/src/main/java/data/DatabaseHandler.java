@@ -77,4 +77,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         return student;
     }
+
+    public void deleteStudent(Student student){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(Util.TABLE_NAME, Util.KEY_ID + "=?", new String[]{String.valueOf(student.getId())});
+        db.close();
+    }
+
+    public int getStudentsCount(){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String COUNT_QUERY = "SELECT * FROM " + Util.TABLE_NAME;
+        Cursor cursor = db.rawQuery(COUNT_QUERY, null);
+
+        return cursor.getCount();
+    }
 }
