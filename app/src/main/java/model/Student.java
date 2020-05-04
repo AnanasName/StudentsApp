@@ -9,6 +9,7 @@ public class Student {
     private byte[] image;
 
     public Student() {
+        this.id = -1;
     }
 
     public Student(int id, String firstName, String lastName, String faculty, double averageScore, byte[] image) {
