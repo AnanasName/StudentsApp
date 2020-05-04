@@ -1,4 +1,4 @@
-package Utils;
+package utils;
 
 public class Util {
     public static final int DATABASE_VERSION = 1;
