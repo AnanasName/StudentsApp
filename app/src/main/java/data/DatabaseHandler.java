@@ -9,6 +9,9 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import model.Student;
 import utils.Util;
 
@@ -40,11 +43,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Util.KEY_FACULTY, student.getFaculty());
-        contentValues.put(Util.KEY_FIRST_NAME, student.getFirstName());
-        contentValues.put(Util.KEY_LAST_NAME, student.getLastName());
-        contentValues.put(Util.KEY_AVERAGE_SCORE, student.getAverageScore());
-        contentValues.put(Util.KEY_IMAGE, student.getImage());
+        putStudent(contentValues, student);
 
         db.insert(Util.TABLE_NAME, null, contentValues);
         db.close();
@@ -65,17 +64,40 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         if (cursor != null){
             try{
-                student.setId(Integer.parseInt(cursor.getString(0)));
-                student.setFaculty(cursor.getString(1));
-                student.setLastName(cursor.getString(2));
-                student.setFirstName(cursor.getString(3));
-                student.setAverageScore(Double.parseDouble(cursor.getString(4)));
-                student.setImage(cursor.getBlob(5));
+                setToStudent(student, cursor);
             }catch (NullPointerException exp){
                 Log.d("Null", "NullPointer");
             }
         }
         return student;
+    }
+
+    public List<Student> getAllStudents(){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        List<Student> studentList = new ArrayList<>();
+
+        String SELECT_ALL_STUDENTS = "SELECT * FROM " + Util.TABLE_NAME;
+        Cursor cursor = db.rawQuery(SELECT_ALL_STUDENTS, null);
+        if (cursor.moveToFirst()){
+            do{
+                Student student = new Student();
+                setToStudent(student, cursor);
+
+                studentList.add(student);
+            }while(cursor.moveToNext());
+        }
+        return studentList;
+    }
+
+    public int updateStudent(Student student){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        putStudent(contentValues, student);
+
+        return db.update(Util.TABLE_NAME, contentValues,
+                Util.KEY_ID + "=?", new String[]{String.valueOf(student.getId())});
     }
 
     public void deleteStudent(Student student){
@@ -93,4 +115,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         return cursor.getCount();
     }
+
+    private void putStudent(ContentValues contentValues, Student student ){
+        contentValues.put(Util.KEY_FACULTY, student.getFaculty());
+        contentValues.put(Util.KEY_FIRST_NAME, student.getFirstName());
+        contentValues.put(Util.KEY_LAST_NAME, student.getLastName());
+        contentValues.put(Util.KEY_AVERAGE_SCORE, student.getAverageScore());
+        contentValues.put(Util.KEY_IMAGE, student.getImage());
+    }
+
+    private void setToStudent(Student student, Cursor cursor){
+        student.setId(Integer.parseInt(cursor.getString(0)));
+        student.setFaculty(cursor.getString(1));
+        student.setLastName(cursor.getString(2));
+        student.setFirstName(cursor.getString(3));
+        student.setAverageScore(Double.parseDouble(cursor.getString(4)));
+        student.setImage(cursor.getBlob(5));
+    }
 }
+
